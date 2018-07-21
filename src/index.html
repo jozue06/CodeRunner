@@ -13,50 +13,14 @@
       <li id="nav-home">
         <a>Home</a>
       </li>
-      <li id="nav-quiz">
-        <a>Quiz</a>
-      </li>
-      <li id="nav-roster">
-        <a>Roster</a>
-      </li>
-      <li id="nav-random">
-        <a>Random</a>
-      </li>
-      <li id="nav-pairs">
-        <a>Pairs</a>
-      </li>
       <li id="nav-repl">
         <a>Repl</a>
       </li>
     </ul>
-    <ul id="auth">
-      <li id="login">
-        <a>Log In</a>
-      </li>
-      <li id="signup">
-        <a>Sign Up</a>
-      </li>
-    </ul>
+
   </nav>
   <div id="home">
-    <div id="courses" class="clearDiv"></div>
-    <form id='new-class' style='display:none;'>
-      Class Code
-      <input type="text" name="classCode">
-      <br> Class Repo
-      <input type="text" name="githubRepo">
-      <br>
-      <input type="submit" value="Submit">
-    </form>
-    <p id='suc-message'></p>
-  </div>
-  <div id="days" style="display:none;">
-  </div>
-  <div id='readMe' class="clearDiv"></div>
-  <div id="quiz" class="clearDiv"></div>
-  <div id="roster" class="clearDiv"></div>
-  <div id="pairs" class="clearDiv"></div>
-  <div id="random" class="clearDiv"></div>
+
   <textarea readonly class="clearDiv" id="resultWindow" style="display:none; resize:both;" rows="34" cols="50">Console Output</textarea>
   <div id="repl" class="clearDiv"></div>
 
@@ -98,23 +62,28 @@
   var editor;
 
 
-  $('#files').on('click', (event) => {
-    if (event.target.nodeName === 'LI') {
-      if (event.target.id === 'new-file') {
-        runEditor('// Create your code and hit run at the end');
-      } else {
-        return superagent.get(event.target.id)
-          .then(data => {
-            runEditor(data.text)
-          });
-      }
-    }
+  // $('#files').on('click', (event) => {
+  //   if (event.target.nodeName === 'LI') {
+  //     if (event.target.id === 'new-file') {
+  //       runEditor('// Create your code and hit run at the end');
+  //     } else {
+  //       return superagent.get(event.target.id)
+  //         .then(data => {
+        
+  //         });
+  //     }
+  //   }  
 
-  });
+  // });
 
-  function runEditor(data) {
+  $('#nav-repl').on('click', () => {
+  runEditor()
+  $('#home').hide();
+});
 
-    console.log(data.text);
+  function runEditor() {
+
+    // console.log(data.text);
     //   $('#home').hide();
     $('#days').hide();
     (function () {
@@ -128,7 +97,11 @@
     amdRequire(['vs/editor/editor.main'], function () {
       editor = monaco.editor.create(document.getElementById('repl'), {
         value: [
-          data
+        `let sum = function(a,b){
+  return a+b;
+};
+sum(2,3);
+console.log('test');`
         ].join('\n'),
         language: 'javascript'
       });
@@ -150,25 +123,25 @@
 
   }
 
-  $('#run').on('click', function (e) {
-    e.preventDefault();
-    $('#resultWindow').empty();
-    let data = editor.getValue();
-    let obj = {}
-    obj.code = data;
-    obj.day = '01-node-ecosystem'
-    // line 137: change to grab from textContent of event click;
-    obj.language = 'javascript';
-    // obj.sha = '563cec42a9bdbee9d7c0a2428486dcbe094f2f51'
-    console.log('data -->', obj);
+  // $('#run').on('click', function (e) {
+  //   e.preventDefault();
+  //   $('#resultWindow').empty();
+  //   let data = editor.getValue();
+  //   let obj = {}
+  //   obj.code = data;
+  //   // obj.day = '01-node-ecosystem'
+  //   // line 137: change to grab from textContent of event click;
+  //   obj.language = 'javascript';
+  //   // obj.sha = '563cec42a9bdbee9d7c0a2428486dcbe094f2f51'
+  //   console.log('data -->', obj);
    
-      superagent.post('http://api.commando.ccs.net/api/v1/code')
-      .send(obj)
-      .then(data => {
-        if(data.body.traceback) $('#resultWindow').text(data.body.traceback);
-        if(data.body.return) $('#resultWindow').text(data.body.return);
-      })
-    });
+      // superagent.post('http://api.commando.ccs.net/api/v1/code')
+      // .send(obj)
+      // .then(data => {
+      //   if(data.body.traceback) $('#resultWindow').text(data.body.traceback);
+      //   if(data.body.return) $('#resultWindow').text(data.body.return);
+      // })
+    // });
  
 </script>
 
