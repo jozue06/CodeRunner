@@ -2,147 +2,75 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" type="text/css" media="screen" href="./styles/styles.css" />
-  <title>Code Commando</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" media="screen" href="./styles/styles.css" />
+    <title>Code Commando</title>
+        
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
-  <nav>
-    <ul id="navigation">
-      <li id="nav-home">
-        <a>Home</a>
-      </li>
-      <li id="nav-repl">
-        <a>Repl</a>
-      </li>
-    </ul>
-
-  </nav>
-  <div id="home">
-
-  <textarea readonly class="clearDiv" id="resultWindow" style="display:none; resize:both;" rows="34" cols="50">Console Output</textarea>
-  <div id="repl" class="clearDiv"></div>
-
-  <div id="files" class="clearDiv"></div>
-  <div>
-    <button style="height:2em;width:5em;font-weight: bold;font-size: 0.75em;display:none;" id='run' type="submit">Run</button>
+    <h1> R P L</h1>
+    <div style="width:10%;height:40%;float: right;">
+     <textarea readonly id="result" name="output" style="float: right;background-color: black;color: white" rows="46" cols="66">Console Output</textarea>
+    </div>
+    <div id="container" style="width:800px;height:600px;border:1px solid grey"></div>
+    <button style="height:2em;width:5em;font-weight: bold;font-size: 0.75em;" id='run' type="submit">Run</button>
+    <script src="app.js"></script>
 </body>
-<script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
-<script>window.$ = window.jQuery = require('jquery');</script>
-<script src="./app.js"></script>
-<script>if (window.module) module = window.module;</script>
 
+<script>
+    // Monaco uses a custom amd loader that overrides node's require.
+    // Keep a reference to node's require so we can restore it after executing the amd loader file.
+    var nodeRequire = global.require;
+</script>
 <script src="../node_modules/monaco-editor/min/vs/loader.js"></script>
 <script>
-  // Save Monaco's amd require and restore Node's require
-  var amdRequire = global.require;
-  global.require = nodeRequire;
+    // Save Monaco's amd require and restore Node's require
+    var amdRequire = global.require;
+    global.require = nodeRequire;
 </script>
 
 <script>
-  import superagent from 'superagent';
-  // require node modules before loader.js comes in
-  var path = require('path');
+    // require node modules before loader.js comes in
+    var editor;
+    var path = require('path');
 
-  function uriFromPath(_path) {
-    var pathName = path.resolve(_path).replace(/\\/g, '/');
-    if (pathName.length > 0 && pathName.charAt(0) !== '/') {
-      pathName = '/' + pathName;
+    function uriFromPath(_path) {
+        var pathName = path.resolve(_path).replace(/\\/g, '/');
+        if (pathName.length > 0 && pathName.charAt(0) !== '/') {
+            pathName = '/' + pathName;
+        }
+        return encodeURI('file://' + pathName);
     }
-    return encodeURI('file://' + pathName);
-  }
-  amdRequire.config({
-    baseUrl: uriFromPath(path.join(__dirname, '../node_modules/monaco-editor/min'))
-  });
-  // workaround monaco-css not understanding the environment
-  self.module = undefined;
-  // workaround monaco-typescript not understanding the environment
-  self.process.browser = true;
-  var editor;
-
-
-  // $('#files').on('click', (event) => {
-  //   if (event.target.nodeName === 'LI') {
-  //     if (event.target.id === 'new-file') {
-  //       runEditor('// Create your code and hit run at the end');
-  //     } else {
-  //       return superagent.get(event.target.id)
-  //         .then(data => {
-        
-  //         });
-  //     }
-  //   }  
-
-  // });
-
-  $('#nav-repl').on('click', () => {
-  runEditor()
-  $('#home').hide();
-});
-
-  function runEditor() {
-
-    // console.log(data.text);
-    //   $('#home').hide();
-    $('#days').hide();
-    (function () {
-      $('#run').hide();
-      let obj = document.getElementsByClassName('clearDiv');
-      Object.values(obj).forEach(div => {
-        div.innerHTML = '';
-      });
-    })();
-
-    amdRequire(['vs/editor/editor.main'], function () {
-      editor = monaco.editor.create(document.getElementById('repl'), {
-        value: [
-        `let sum = function(a,b){
-  return a+b;
-};
-sum(2,3);
-console.log('test');`
-        ].join('\n'),
-        language: 'javascript'
-      });
+    amdRequire.config({
+        baseUrl: uriFromPath(path.join(__dirname, '../node_modules/monaco-editor/min'))
     });
-    $('#repl').css({
-      'width': '400',
-      'height': '467',
-      'float': 'left',
-      'clear': 'left',
-    })
-    $('#resultWindow').css({
-      // 'float': 'left',
-      'background-color': 'black',
-      'color': 'white',
-    })
-    $('#resultWindow').show()
-    $('#resultWindow').text('Output Console')
-    $('#run').show()
-
-  }
-
-  // $('#run').on('click', function (e) {
-  //   e.preventDefault();
-  //   $('#resultWindow').empty();
-  //   let data = editor.getValue();
-  //   let obj = {}
-  //   obj.code = data;
-  //   // obj.day = '01-node-ecosystem'
-  //   // line 137: change to grab from textContent of event click;
-  //   obj.language = 'javascript';
-  //   // obj.sha = '563cec42a9bdbee9d7c0a2428486dcbe094f2f51'
-  //   console.log('data -->', obj);
-   
-      // superagent.post('http://api.commando.ccs.net/api/v1/code')
-      // .send(obj)
-      // .then(data => {
-      //   if(data.body.traceback) $('#resultWindow').text(data.body.traceback);
-      //   if(data.body.return) $('#resultWindow').text(data.body.return);
-      // })
-    // });
- 
+    // workaround monaco-css not understanding the environment
+    self.module = undefined;
+    // workaround monaco-typescript not understanding the environment
+    self.process.browser = true;
+    amdRequire(['vs/editor/editor.main'], function () {
+         editor = monaco.editor.create(document.getElementById('container'), {
+            value: [
+                'function x() {',
+                '\tconsole.log("Hello world!");',
+                '}'
+            ].join('\n'),
+            language: 'javascript'
+        });
+    });
+  document.getElementById('run').addEventListener('click', function (e){
+  console.log('clickde');
+  e.preventDefault();
+  let data = editor.getValue();
+  let obj = {};
+  obj.code = data;
+  obj.language = editor.language;
+  run();
+});
 </script>
+
 
 </html>

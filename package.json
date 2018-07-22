@@ -50,6 +50,7 @@
     "babel-env": "^2.4.1",
     "babel-eslint": "^8.2.6",
     "babel-register": "^6.26.0",
+    "compile-run": "^1.2.2",
     "cookie-parser": "^1.4.3",
     "dotenv": "^6.0.0",
     "electron-compile": "^6.4.3",

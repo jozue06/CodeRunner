@@ -1,53 +1,101 @@
 'use strict';
 
-// require('babel-register');
-// import superagent from 'superagent';
+import nel from 'nel';
+let compileRun = require('compile-run');
+// import fs from 'fs-extra';
+// import auth from '../../auth/middleware.js';
+// import Classes from '../../models/classes.js';
 
-// let day;
-// let classCode;
-// let apiUrl;
-// let dayName;
+let solution = {};
+let onStdoutArray = [];
+let onStderrArray = [];
 
-document.getElementById('nav-home').addEventListener('click', () => {
-  // if (!window.sessionStorage.jwt) return alert('please sign up / log in first');
-  // clearDiv();
-  $('#home').show();
-  $('#new-class').show();
-  // superagent.get('http://localhost:3000/api/v1/user');
-  // // superagent.get('http://api.commando.ccs.net/api/v1/user')
-  // .set({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.sessionStorage.jwt}` })
-  // .then(data => {
-  //   console.log(data.body.courses);
-  //   data.body.courses.forEach(course => {
-  //     $('#courses').append(`<br /><a href=# id="${course.apiLink}" class="course-class">${course.classCode}</a><br />`);
-  //   });
-  // });
-});
+const run = (obj) => {
 
+  if (obj.language === 'javascript') {
+    var session = new nel.Session();
+    session.execute(obj.code, {
+      onSuccess: (output) => {
+        solution.return = output.mime['text/plain'];
+      },
+      onError: (output) => {
+        solution.error = output.error;
+      },
+      onStdout: (output) => {
+        onStdoutArray.push(output);
+        solution.log = onStdoutArray;
+      },
+      onStderr: (output) => {
+        onStderrArray.push(output);
+        solution['console.error'] = onStderrArray;
+      },
+      afterRun: () => {
+        onStdoutArray = [];
+        let outputResult = {};
+        if (solution.error) {
+          outputResult.error = solution.error;
+          res.send(outputResult);
+        } else if (solution.log && !solution.return) {
+          outputResult.log = solution.log;
+          solution.log = null;
+          let resultArray = outputResult.log;
+          for (let val of resultArray) {
+            resultArray[val] += resultArray[val];
+          }
+          res.send(resultArray);
+        } else if (solution.log && solution.return) {
+          outputResult.log = solution.log;
+          outputResult.return = solution.return;
+          solution.log = null;
+          let resultArray = outputResult.log;
+          for (let val of resultArray) {
+            resultArray[val] += resultArray[val];
+          }
+          let finalResult = resultArray + '\n' + outputResult.return;
+          res.send(finalResult);
+        } else if (!solution.log && solution.return) {
+          outputResult.return = solution.return;
+          res.send(outputResult.return);
 
-// superagent.get(`http://localhost:3000/api/v1/code/${day}?classCode=` + classCode)
-//   .set({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.sessionStorage.jwt}` })
-//   .then(data => {
-//     $('#files').append(`<ul id="files"></ul>`);
-//     console.log(data.body);
-//     let files = data.body;
-//     for (let i = 0; i < files.length; i++) {
-//       $('#files ul').append(`<br /><li id="${files[i].link}">${files[i].file}</li>`);
-//     }
-//     $('#files ul').append(`<br /><li id="new-file">Create A New File</li>`);
-//   });
-// });
-
-// function clearDiv() {
-//   $('#run').hide();
-//   $('#resultWindow').hide();
-//   $('#days').hide();
-//   let obj = document.getElementsByClassName('clearDiv');
-//   Object.values(obj).forEach(div => {
-//     div.innerHTML = '';
-//   });
-// }
-
-
-// const port = process.env.PORT || 3005;
-// require('./server.js').start(port);
+        } else if (obj.language === 'python') {
+          let input = null;
+          compileRun.runPython(obj.code, input, function (stdout, stderr, err) {
+            if (!stderr) {
+              // fs.remove(dirPath, err => {
+              //   if (err) return console.error(err);
+              //   console.log('Successfully removed the code dir');
+              // });
+              res.send(stdout);
+            } else {
+              console.log(err);
+              // fs.remove(dirPath, err => {
+              //   if (err) return console.error(err);
+              //   console.log('Successfully removed the code dir');
+              // });
+              res.send(stderr);
+            }
+          });
+        } else if (obj.language === 'java') {
+          let input = null;
+          compileRun.runJava(obj.code, input, function (stdout, stderr, err) {
+            if (!stderr) {
+              // fs.remove(dirPath, err => {
+              //   if (err) return console.error(err);
+              //   console.log('Successfully removed the code dir');
+              // });
+              res.send(stdout);
+            } else {
+              // fs.remove(dirPath, err => {
+              //   if (err) return console.error(err);
+              //   console.log('Successfully removed the code dir');
+              // });
+              console.log(err);
+              res.send(stderr);
+            }
+          });
+        }
+      },
+    });
+  }
+};
+export default {run};
