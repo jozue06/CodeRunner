@@ -11,9 +11,10 @@ let onStdoutArray = [];
 let onStderrArray = [];
 
 const run = (obj) => {
-
+  console.log('in runner -->  ', obj);
   if (obj.language === 'javascript') {
     var session = new nel.Session();
+    console.log('in session -->');
     session.execute(obj.code, {
       onSuccess: (output) => {
         solution.return = output.mime['text/plain'];
@@ -98,4 +99,3 @@ const run = (obj) => {
     });
   }
 };
-export default {run};

@@ -5,19 +5,25 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" media="screen" href="./styles/styles.css" />
     <title>Code Commando</title>
-        
+
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
 </head>
 
 <body>
     <h1> R P L</h1>
+    <div>
+        <input type="text" name="language" id="language-input">
+        <button style="height:2em;width:5em;font-weight: bold;font-size: 0.75em;" id='language'>Select</button>
+
+    </div>
     <div style="width:10%;height:40%;float: right;">
-     <textarea readonly id="result" name="output" style="float: right;background-color: black;color: white" rows="46" cols="66">Console Output</textarea>
+        <textarea readonly id="result" name="output" style="float: right;background-color: black;color: white" rows="46" cols="66">Console Output</textarea>
     </div>
     <div id="container" style="width:800px;height:600px;border:1px solid grey"></div>
     <button style="height:2em;width:5em;font-weight: bold;font-size: 0.75em;" id='run' type="submit">Run</button>
     <script src="app.js"></script>
+    <script src="language.js"></script>
 </body>
 
 <script>
@@ -33,43 +39,53 @@
 </script>
 
 <script>
-    // require node modules before loader.js comes in
-    var editor;
-    var path = require('path');
-
-    function uriFromPath(_path) {
-        var pathName = path.resolve(_path).replace(/\\/g, '/');
-        if (pathName.length > 0 && pathName.charAt(0) !== '/') {
-            pathName = '/' + pathName;
-        }
-        return encodeURI('file://' + pathName);
-    }
-    amdRequire.config({
-        baseUrl: uriFromPath(path.join(__dirname, '../node_modules/monaco-editor/min'))
+    let editor;
+    let runLanguage;
+    document.getElementById('run').addEventListener('click', function (e) {
+        console.log('clickde');
+        e.preventDefault();
+        let data = editor.getValue();
+        let obj = {};
+        obj.code = data;
+        obj.language = runLanguage;
+        run(obj);
     });
-    // workaround monaco-css not understanding the environment
-    self.module = undefined;
-    // workaround monaco-typescript not understanding the environment
-    self.process.browser = true;
-    amdRequire(['vs/editor/editor.main'], function () {
-         editor = monaco.editor.create(document.getElementById('container'), {
-            value: [
-                'function x() {',
-                '\tconsole.log("Hello world!");',
-                '}'
-            ].join('\n'),
-            language: 'javascript'
+    // require node modules before loader.js comes in
+    document.getElementById('language').addEventListener('click', function (e) {
+        console.log('clickde');
+        e.preventDefault();
+        runLanguage = document.getElementById('language-input').value;
+        //   document.getElementById('language-input').val('');
+
+
+
+        var path = require('path');
+
+        function uriFromPath(_path) {
+            var pathName = path.resolve(_path).replace(/\\/g, '/');
+            if (pathName.length > 0 && pathName.charAt(0) !== '/') {
+                pathName = '/' + pathName;
+            }
+            return encodeURI('file://' + pathName);
+        }
+        amdRequire.config({
+            baseUrl: uriFromPath(path.join(__dirname, '../node_modules/monaco-editor/min'))
+        });
+        // workaround monaco-css not understanding the environment
+        self.module = undefined;
+        // workaround monaco-typescript not understanding the environment
+        self.process.browser = true;
+        amdRequire(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('container'), {
+                value: [
+                    'function x() {',
+                    '\tconsole.log("Hello world!");',
+                    '}'
+                ].join('\n'),
+                language: runLanguage
+            });
         });
     });
-  document.getElementById('run').addEventListener('click', function (e){
-  console.log('clickde');
-  e.preventDefault();
-  let data = editor.getValue();
-  let obj = {};
-  obj.code = data;
-  obj.language = editor.language;
-  run();
-});
 </script>
 
 
