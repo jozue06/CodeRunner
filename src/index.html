@@ -22,9 +22,10 @@
     </div>
     <div id="container" style="width:800px;height:600px;border:1px solid grey;"></div>
     <button style="height:2em;width:5em;font-weight: bold;font-size: 0.75em;" id='run' type="submit">Run</button>
-    <script src="app.js"></script>
-    <script src="language.js"></script>
+
+    <!-- <script src="language.js"></script> -->
     <!-- <script src="loader.js"></script> -->
+    <script src="app.js"></script>
 </body>
 
 <script>
@@ -38,20 +39,26 @@
     var amdRequire = global.require;
     global.require = nodeRequire;
 </script>
-
 <script>
+    let compile_run = require('compile-run');    
     let editor;
     let runLanguage;
+
     document.getElementById('run').addEventListener('click', function (e) {
         console.log('clickde');
         e.preventDefault();
-        let data = editor.getValue();
-        let obj = {};
-        obj.code = data;
-        obj.language = runLanguage;
-        run(obj)
-        document.getElementById('result').append(obj);
-   
+        let code = editor.getValue();
+        let callback = null;
+        compile_run.runNode(code, callback, function (stdout, stderr, err) {
+            if (!err) {
+                console.log(stdout);
+                console.log(callback);
+                console.log(stderr);
+            } else {
+                console.log(err);
+            }
+        });
+
     });
     // require node modules before loader.js comes in
     document.getElementById('language').addEventListener('click', function (e) {
@@ -85,8 +92,14 @@
                 language: runLanguage
             });
         });
-        
-        });
+
+    });
+
+    // const nel = require('nel');
+    // const compileRun = require('compile-run');
+    // import fs from 'fs-extra';
+    // import auth from '../../auth/middleware.js';
+    // import Classes from '../../models/classes.js';
 </script>
 
 
